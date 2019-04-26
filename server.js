@@ -15,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 2001;
 
 // Use deployed db when deployed, otherwise use local 
-const databaseURL = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+const databaseURL = process.env.MONGODB_URI || "mongodb://user:password69@ds119394.mlab.com:19394/heroku_mwkmbdtp";
 
 const db = require("./models");
 
