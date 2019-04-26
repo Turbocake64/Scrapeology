@@ -1,7 +1,7 @@
 
 $(document).ready(function() {
-    console.log("Connected")
-    var postContainer = $(".post-container");
+    console.log("index Connected");
+    var redditPostContainer = $("#reddit-post-container");
     $(document).on("click", ".btn.save", handlePostSave);
     $(document).on("click", ".scrape-new", handlePostScraped);
 
@@ -9,8 +9,8 @@ $(document).ready(function() {
     initPage();
 
     function initPage() {
-        //Empty the article container, run an ajax request for unsaved posts
-        postContainer.empty();
+        //Empty the post container, run an ajax request for unsaved posts
+        redditPostContainer.empty();
         $.get("api/redditposts?saved=false")
         .then(function(data) {
             // render posts to the page if there are any
@@ -22,13 +22,13 @@ $(document).ready(function() {
         });
     };
 
-    function renderPosts() {
+    function renderPosts(results) {
         var redditPostPanels = [];
 
-        for (var i = 0; i < redditPost.length; i++) {
-            redditPostPanels.push(createPanel(redditPost[i]));
+        for (var i = 0; i < results.length; i++) {
+            redditPostPanels.push(createPanel(results[i]));
         }
-        postContainer.append(redditPostPanels);
+        redditPostContainer.append(redditPostPanels);
     }
 
     function createPanel(post) {
@@ -48,7 +48,7 @@ $(document).ready(function() {
             "</div>"                        
             ].join(""));
         
-        panel.data("_id", article._id);
+        panel.data("_id", post._id);
         return panel;
     }
 
@@ -68,7 +68,7 @@ $(document).ready(function() {
            "</div>"
     ].join(""));
     //append data to the page
-    $("#redditPostContainer").append(emptyAlert);
+    $(".reddit-post-container").append(emptyAlert);
     };
 
     function handlePostSave() {
@@ -77,8 +77,8 @@ $(document).ready(function() {
         postToSave.saved = true;
 
         $.ajax({
-            method: "PATCH",
-            url: "/api/headlines",
+            method: "POST",
+            url: "/api/redditposts",
             data: postToSave
         })
         .then(function(data) {
@@ -94,7 +94,7 @@ $(document).ready(function() {
         $.get("/api/fetch")
             .then(function(data) {
                 initPage();
-                bootbox.alert("<h3 class='ext-center m-top-80'>" + data.message + "</h3>")
+                alert(data.message)
             });
-    }
+    };
 });

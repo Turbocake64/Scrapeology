@@ -2,7 +2,7 @@ var Note = require("../models/Note");
 var makeDate = require("../scripts/dates");
 
 module.exports = {
-    get: function(ata, cb) {
+    get: function(data, cb) {
         Note.find({
             redditPostId: data._id
         }, cb);

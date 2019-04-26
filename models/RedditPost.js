@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 
 var Schema = mongoose.Schema;
 
-var redditPostSchema = new Schema({
+var RedditPostSchema = new Schema({
     title: {
         type: String,
         required: true,
@@ -27,6 +27,6 @@ var redditPostSchema = new Schema({
 
 });
 
-var redditPost = mongoose.model("redditPost", redditPostSchema);
+var RedditPost = mongoose.model("RedditPost", RedditPostSchema);
 
-module.exports = redditPost;
+module.exports = RedditPost;

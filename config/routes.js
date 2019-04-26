@@ -42,7 +42,7 @@ module.exports = function(router) {
         });
     });
 
-    router.delete("api/redditposts/:id", function(req, res) {
+    router.delete("/api/redditposts/:id", function(req, res) {
         var query = {};
         query._id = req.params.id;
         redditPostController.delete(query, function( err, data) {
@@ -50,15 +50,15 @@ module.exports = function(router) {
         });
     });
 
-    router.patch("api/redditposts/", function(req, res) {
+    router.post("/api/redditposts/", function(req, res) {
         redditPostController.update(req.body, function(err, data) {
             res.json(data);
         });
     });
 
-    router.get("api/notes/:headline_id", function(req, res) {
+    router.get("/api/notes/:redditposts_id", function(req, res) {
         var query = {};
-        if (req.params.headline_id) {
+        if (req.params.redditposts_id) {
             query._id = req.params.headline_id;
         }
 
@@ -66,14 +66,14 @@ module.exports = function(router) {
             res.json(data);
         });
     });
-    router.delete("api/notes/:id", function(req, res) {
+    router.delete("/api/notes/:id", function(req, res) {
         var query = {};
         query._id = req.params.id;
         notesController.delete(query, function(err, data) {
             res.json(data)
         });
     });
-    router.post("api/notes", function(req, res) {
+    router.post("/api/notes", function(req, res) {
         notesController.save(req.body, function(err, data) {
             res.json(data);
         });

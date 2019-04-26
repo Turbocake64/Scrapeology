@@ -1,5 +1,7 @@
 $(document).ready(function() {
-    var postContainer = $(".post-container");
+    console.log("saved.js Connected");
+
+    var redditPostContainer = $("#reddit-post-container");
     $(document).on("click", ".btn.delete", handlePostDelete);
     $(document).on("click", ".btn.notes", handlePostNotes);
     $(document).on("click", ".btn.save", handleNoteSave);
@@ -8,8 +10,8 @@ $(document).ready(function() {
     initPage();
 
     function initPage() {
-        postContainer.empty();
-        $.get("api/redditposts?saved=true")
+        redditPostContainer.empty();
+        $.get("/api/redditposts?saved=true")
         .then(function(data) {
             // render posts to the page if there are any
             if (data && data.length) {
@@ -20,13 +22,13 @@ $(document).ready(function() {
         });
     }
 
-    function renderPosts() {
+    function renderPosts(savedPosts) {
         var redditPostPanels = [];
 
-        for (var i = 0; i < redditPost.length; i++) {
-            redditPostPanels.push(createPanel(redditPost[i]));
+        for (var i = 0; i < savedPosts.length; i++) {
+            redditPostPanels.push(createPanel(savedPosts[i]));
         }
-        postContainer.append(redditPostPanels);
+        redditPostContainer.append(redditPostPanels);
     }
 
     function createPanel(post) {
@@ -35,10 +37,10 @@ $(document).ready(function() {
             "<div class='panel-heading ext-center'>",
             "<h3>",
             post.title,
-            "<a class='btn btn-danger delete'>",
+            "<button class='btn btn-danger delete'>",
             "Delete from Saved",
-            "</a>",
-            "<a class='btn btn-info notes'>Article Notes</a>",
+            "</button>",
+            "<button class='btn btn-info notes'>Article Notes</button>",
             "</h3>",
             "</div>",
             "<div class='panel-body'>",
@@ -47,7 +49,7 @@ $(document).ready(function() {
             "</div>"                        
             ].join(""));
         
-        panel.data("_id", article._id);
+        panel.data("_id", post._id);
         return panel;
     }
 
@@ -93,6 +95,7 @@ $(document).ready(function() {
                 notesToRender.push(currentNote);
             }
         }
+        $(".note-container").push(notesToRender);
     }
 
     function handlePostDelete() {
@@ -102,14 +105,16 @@ $(document).ready(function() {
             url: "/api/redditposts/" + postToDelete._id
         }).then(function(data) {
             if(data.ok) {
-                initPage()
+                initPage();
             }
         });
     }
 
     function handlePostNotes() {
         var currentPost = $(this).parents(".panel").data();
-        $.get("api/notes/" + currentPost._id).then(function(data) {
+        console.log(currentPost);
+        $.get("/api/notes/" + currentPost._id).then(function(data) {
+            console.log(data);
             var modalText = [
                 "<div class='container-fluid text-center'>",
                 "<h4>Post Notes: ",
@@ -118,9 +123,10 @@ $(document).ready(function() {
                 "<ul class='list-group note-container'>",
                 "</ul>",
                 "<textarea placeholder='New Note' rows='4' cols='60'></textarea>",
-                "<button class='btn btn-success save'>Save Note</button>",
+                "<button class='btn btn-success save' data-post=" + currentPost._id + ">Save Note</button>",
                 "</div>"
                 ].join("");
+                console.log(noteData);
 
                 bootbox.dialog({
                     message: modalText,
@@ -133,6 +139,7 @@ $(document).ready(function() {
 
                 $(".btn-save").data("post", noteData);
 
+
                 renderNotesList(noteData);
         })
     }
@@ -144,11 +151,12 @@ $(document).ready(function() {
 
         if (newNote) {
             noteData = {
-                _id: $(this).data("article")._id,
+                _id: $(this).data("post")._id,
                 noteText: newNote
             };
             $.post("/api/notes", noteData).then(function() {
                 bootbox.hideAll();
+                initPage();
             });
             
         } 
@@ -161,10 +169,9 @@ $(document).ready(function() {
             method: "DELETE",
             url: "/api/notes/" + noteToDelete
         }).then(function() {
-            bootbox.hideAll();
+            hideAll();
         });
 
     }
 
-    console.log("saved.js online")
 });

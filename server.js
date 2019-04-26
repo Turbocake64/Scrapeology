@@ -1,21 +1,26 @@
 // Dependencies
-var express = require("express");
-var mongoose = require("mongoose");
-var expressHandlebars = require("express-handlebars");
-var bodyParser = require("body-parser");
+const express = require("express");
+const mongoose = require("mongoose");
+const expressHandlebars = require("express-handlebars");
+const bodyParser = require("body-parser");
 
 // Require axios and cheerio. This makes the scraping possible
-var axios = require("axios");
-var cheerio = require("cheerio");
-
-// Set up our port to be host designated or 2001
-var PORT = process.env.PORT || 2001;
+const axios = require("axios");
+const cheerio = require("cheerio");
 
 // Initialize Express
-var app = express();
+const app = express();
+
+// Set up our port to be host designated or 2001
+const PORT = process.env.PORT || 2001;
+
+// Use deployed db when deployed, otherwise use local 
+const databaseURL = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+const db = require("./models");
 
 // Set up Express Router
-var router = express.Router();
+const router = express.Router();
 
 // Require routes file pass our router object
 require("./config/routes")(router);
@@ -37,17 +42,15 @@ app.use(bodyParser.urlencoded({
 // Have requests go through our middleware
 app.use(router);
 
-// Use deployed db when deployed, otherwise use local 
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
-
 // Connect Mongo to our db
-mongoose.connect(MONGODB_URI);
+mongoose.connect(databaseURL, { useNewUrlParser: true });
 
+app.get("/scrape", function(req, res) {
+  var results = [];
 axios.get("https://old.reddit.com").then(function(response) {
 
   var $ = cheerio.load(response.data);
 
-  var results = [];
 
   $("div.top-matter").each(function(i, element) {
 
@@ -65,10 +68,23 @@ axios.get("https://old.reddit.com").then(function(response) {
       subreddit: subreddit,
       subLink: subLink
     });
+    
   });
+  
+  // console.log(results);
+  
+}).then((data) => {
+  // console.log(results[0])
+  results.forEach(result => db.RedditPost.create(result))
+  
+.catch(function(err) {
+  console.log(err.code);
+})
+.then(function(data) {
+  res.send("Articles scraped");
+});
 
-  console.log(results);
-
+});
 });
 
 // Listen on port 2001
